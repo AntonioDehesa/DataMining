@@ -72,3 +72,33 @@ An itemset is deemed maximal if it is frequent and has no frequent supersets.
 ### Closed
 
 An itemset is closed if all supersets of X have less support. 
+
+## Minimal Generators
+
+If a frequent itemset has no subsets with the same support, it is a minimal generator. 
+
+It is not enough enough to simply determine that an itemset is frequent to mine the actual itemsets. Additional steps are required. 
+Initially, the maximal itemset is empty. In order to add itemsets to the maximal frequent set, they must pass some tests: 
+* item set y cannot be a member of the maximal set and that the item set x is a subset of item set y. If such a y item set exists, then the x item set cannot be maximal. If such an item set y does not exist, it is possible for item set x to be maximal.
+* item set y cannot be a member of the maximal set and item set y cannot be a subset of item set x. If such an item set y exist, then y cannot be maximal. And if it is a member of the maximal set, it must be removed.
+
+### GenMax algorithm
+
+It works using tidsets. 
+We set the tidsets for the elements (only those that fulfill the minimum support requirement)
+Then those tidsets get intersected, and the intersection gets compared to the minimum support level. If it does not fulfill it, it gets pruned.
+We do this with every combination until we get the maximal itemsets. 
+Looks oddly similar to the Eclat algorithm. Because it is expandedd from it.
+
+#### Differences: 
+* Objectives: 
+The Eclat algorithm wants to find all frequent itemsets
+The GenMax algorithm just wants the maximal itemsets.
+
+## Mining Closed Frequen Itemsets
+CHARM algorithm.
+Properties: 
+* If t(x_i) == t(x_j) then c(x_i) == c(x_j) == c(x_i U x_j)
+* If t(x_i)
+
+will check later
