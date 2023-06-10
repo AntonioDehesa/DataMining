@@ -1,0 +1,78 @@
+---
+title: "Assignment 2"
+author: "Antonio Dehesa"
+output: pdf_document
+---
+
+## Introduction
+
+### Purpose
+
+The purpose of this program is to explore the Iris dataset as the first programming assignment for the Data Mining course, perform exploratory operations, display features of the dataset, and create plots for the dataset.
+
+### Dataset
+
+The dataset to be used is the Iris dataset, for which more information can be found here: https://www.ritchieng.com/machine-learning-iris-dataset/
+
+
+### Use case
+
+This program is an example on the first steps to be performed on a new dataset. 
+
+## Proposed Libraries
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(datasets)
+library(ggplot2)
+```
+
+The required libraries for this program are: 
+
+* datasets: This librarty includes the datasaet that we require, Iris. In this case, it is a mandatory library. 
+
+## Dataset Analysis
+
+We need to import the Iris dataset, for which we will explore the available information.
+
+```{r}
+data(iris)
+str(iris)
+```
+We can see that there are 5 total variables in the dataset: Sepal.Length, Sepal.Width, Petal.Length, Petal.Width, and Species. 
+We can also see that the first four variables are of numeric type, while the last variable is of type Factor.
+Finally, we can see that there are a total of 150 observations in the dataset. 
+
+```{r}
+# Now we can look for more information in the dataset, such as the mean
+sapply(iris[,1:4], FUN=min)
+sapply(iris[,1:4], FUN=mean)
+sapply(iris[,1:4], FUN=max)
+```
+
+With this, we can see the approximate range for the dataset, as we can see the minimum value for each column, the maximum, and the average, except for the Species column, as this is not a numeric column. 
+
+## Plots
+
+```{r}
+ggplot(data=iris, mapping = aes(y = Sepal.Length, x = Sepal.Width)) + 
+  geom_point() + 
+  geom_smooth(method=lm)
+```
+By creating a plot of sepal length vs sepal width, we cannot see any obvious or clear relationship. 
+By using a linear model to fit a line for the points, we can see that there really is no direct relationship between the sepal length and the sepal width. 
+
+We can also add the petal length as a third factor. In this case, we can include it as a color gradient to the plot.
+
+```{r}
+ggplot(data=iris, mapping = aes(y = Sepal.Length, x = Sepal.Width, color = Petal.Length)) + 
+  geom_point() + 
+  geom_smooth(method=lm)
+```
+We can see a relationship, in which most of the points on the bottom-right part of the plot tend to be darker, which with the color gradient code, we know it means that most of these points have a petal length within 1 and 3, while most of the points on the upper-left part of the plot tend to be lighter, which means they are between 4 and 6. 
+
+In other words, the higher the sepal width, the lower the sepal length, the petal length would decrease.
+The lower the sepal width, the higher the sepal length, the petal length would increase. 
+
+## Conclusions
