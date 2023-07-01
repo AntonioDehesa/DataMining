@@ -1,0 +1,72 @@
+# Intent of the application
+
+The purpose of this program is to explore the Iris dataset as the first programming assignment for the Data Mining course, perform exploratory operations, display features of the dataset, and create plots for the dataset.
+
+# Dataset to be used, including source
+
+The dataset to be used is the Iris dataset, for which more information can be found here: https://www.ritchieng.com/machine-learning-iris-dataset/
+
+# Use case
+
+The use case of this application could be to demonstrate basic operations with datasets, as the first steps to take when exploring a dataset for the first time. 
+
+# Variables
+
+Sepal.Length: The length of the sepal, which is the outer part of the flower that encloses a developing bud. 
+Sepal.Width: The width of the sepal.
+Petal.Length: The length of the petal of the flower, which are leaves that surround the reproductive parts of a flower. 
+Petal.Width: The width of the petal of the flower. 
+
+# Labels
+
+Species: Describes the species of the flower associated to the previous measurements. 
+
+# Data import
+
+In this application, there is no input needed from the user.
+
+# Libraries
+
+Sklearn: Used to import the Iris dataset. 
+Numpy: Used to obtain the norm of a vector, and the distance between two vectors
+Pandas: Used to manage the vectors in the Iris dataset, as well as to perform the dot product between two vectors.
+
+datasets: Used to import the Iris dataset
+ggplot2: Used to create plots from the dataset
+
+# Library source
+
+Sklearn: Source and latest changes -> https://scikit-learn.org/dev/whats_new/v1.3.html
+Numpy: Source and latest releases -> https://numpy.org/news/
+Pandas: Source and latest changes -> http://pandas.pydata.org/pandas-docs/stable/
+
+datasets: source -> https://cran.r-project.org/package=dataset
+ggplot2: source -> https://github.com/tidyverse/ggplot2
+
+# Proposed solution
+
+# Application outputs
+
+The expected outputs for this application are: 
+
+Features of the dataset: basic information of the dataset, such as the variables, labels, size of the dataset, etc. 
+Scatter plot of the sepal length vs the sepal width, including a third dimension, the petal length.
+
+Dot product between the sepal length and the sepal width vectors
+Norm of the sepal length vector
+Distance between the sepal length and the sepal width vectors
+
+# Visualization of outputs
+
+# Analysis of results
+
+We can see a relationship, in which most of the points on the bottom-right part of the plot tend to be darker, which with the color gradient code, we know it means that most of these points have a petal length within 1 and 3, while most of the points on the upper-left part of the plot tend to be lighter, which means they are between 4 and 6. 
+
+In other words, the higher the sepal width, the lower the sepal length, the petal length would decrease.
+The lower the sepal width, the higher the sepal length, the petal length would increase. 
+
+
+Unfortunately, the dot product by itself does not tell us much. In this case, we can only see that the dot product is possitive, and it has a high magnitude. This could indicate a high degree of correlation, but it is not guaranteed. 
+
+With the norm of the sepal length vector, we can tell that the magnitudes of each point in the vector may not be very large. 
+Finally, with the distance obtained between the sepal length and the sepal width vector we can see that it was low, which would confirm, with the large dot product previously obtained, that the two vectors are highly related. 

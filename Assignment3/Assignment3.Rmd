@@ -1,0 +1,210 @@
+---
+title: "Assignment 3"
+author: "Antonio Dehesa"
+output: pdf_document
+---
+
+# Intent of the application
+
+The purpose of this application is to explore clustering techniques, as well as a dimensionality reduction technique (Principal Component Analysis) and compare the results in a dataframe where the reduction technique was applied and a dataframe where it was not applied. 
+
+# Dataset to be used, including source
+
+The dataset to be used is the Iris dataset, for which more information can be found here: https://www.ritchieng.com/machine-learning-iris-dataset/
+
+# Mathematical background
+
+## Elbow Method
+
+Clustering is a technique used in Data Mining in order to split the observations in a dataset into multiple groups. 
+One of the most used methods for this is K-means, which consists in splitting n observations into k clusters, according to their mean. 
+The elbow method is one of the most used methods to determine K. It is a graphical method, in which the percentage of explained variation is plotted as a function of the number of clusters. When an "elbow" is formed in the plot, that is the number of clusters that should be used. 
+
+## Principal Component Analysis (PCA)
+
+Dimensionality reduction method to reduce the dimensionality (variables) of large datasets, while preserving its most essential information. 
+It is used to reduce the complexity of algorithms, while sacrificing as little accuracy as possible. 
+It can also help to reduce the noise in the data. 
+
+# Use case
+
+This application can be used to demonstrate the usefulness of both clustering techniques and dimensionality reduction technique with a well known dataset, which would allow for easy reproduction. 
+
+# Variables
+
+Sepal.Length: The length of the sepal, which is the outer part of the flower that encloses a developing bud. 
+Sepal.Width: The width of the sepal.
+Petal.Length: The length of the petal of the flower, which are leaves that surround the reproductive parts of a flower. 
+Petal.Width: The width of the petal of the flower. 
+
+# Labels
+
+Species: Describes the species of the flower associated to the previous measurements. 
+
+# Data import
+
+In this application, there is no input needed from the user.
+
+## Proposed Libraries
+
+datasets: Used to import the Iris dataset
+ggplot2: Used to create plots from the dataset
+factoextra: Used to create the elbow plot, as well as visualize multivariate data analyses. In this case, both the elbow plot and the PCA (Principal Component Analysis) will be used. 
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(datasets)
+library(ggplot2)
+library(factoextra)
+library(ggfortify)
+library(fpc) # For DBSCAN
+library(ClusterR) # For Gaussian Mixture Models, for distribution based clustering
+```
+
+# Library source
+
+datasets: source -> https://cran.r-project.org/package=dataset
+ggplot2: source -> https://github.com/tidyverse/ggplot2
+factoextra: source -> https://cran.r-project.org/web/packages/factoextra/index.html
+fpc: source -> https://cran.r-project.org/web/packages/dbscan/index.html
+
+# Proposed solution
+
+## Dataset Analysis
+
+We need to import the Iris dataset, for which we will explore the available information.
+
+```{r}
+data(iris)
+str(iris)
+```
+
+## Elbow Plot
+
+```{r}
+# To perform the elbow plot, we can use the fviz_nbclust method from the factoextra library
+# as kmeans cannot work with non-numeric values, we remove the labels in a temporary dataset
+iris_no_labels <- iris[,-5]
+# Now we randomly shuffle the dataset, as to avoid the observations to be clustered directly from the dataset
+set.seed(987654) 
+iris_no_labels <- iris_no_labels[sample(nrow(iris_no_labels)),]
+fviz_nbclust(iris_no_labels, kmeans, method = "wss")
+```
+As we can see in our plot, the optimal number of clusters is 3. 
+This makes sense when taking into consideration our dataset, as there are a total of 3 labels: Virginica, Versicolor, and Setosa. 
+
+```{r}
+# Setting optimal number of clusters
+k <- 3
+```
+
+
+## Principal Component Analysis
+
+To perform the PCA, we can use the included function "prcomp". 
+
+```{r}
+PCA <- prcomp(iris_no_labels, center=TRUE, scale. = TRUE)
+attributes(PCA)
+PCA$center
+PCA
+```
+## Clustering
+
+### K-means
+
+```{r}
+km.original.ans <- kmeans(iris_no_labels, centers = k)
+km.original.ans
+```
+```{r}
+km.pca.ans <- kmeans(PCA$x, centers = k)
+km.pca.ans
+```
+We can now plot both results to compare them.
+
+```{r}
+# Plot for the dataset without applying PCA
+km.orig.plot <- factor(km.original.ans$cluster)
+ggplot(iris_no_labels, aes(Sepal.Length, Sepal.Width, color=km.orig.plot)) + geom_point() + xlab("Sepal.Length") + ylab("Sepal.Width")
+```
+
+
+```{r}
+# Plot for the dataset after applying PCA
+km.pca.plot <- factor(km.pca.ans$cluster)
+ggplot(PCA, aes(PC1, PC2, color=km.pca.plot)) + geom_point() + xlab("PC1") + ylab("PC2")
+```
+Results for K-means:
+
+We can see that applying K-means clustering for the dataset without applying PCA the observations are split into 3 clusters with the following counts: 21, 33, 96.
+If we perform K-means clustering for the dataset after applying PCA, the observations are split into 3 clusters with the following counts: 53, 47, 50.
+
+If we look at the original dataset, the observations are: 
+
+```{r}
+table(iris$Species)
+```
+Exactly 50, 50, 50. 
+Therefore, the closes approximation is K-means clustering after applying PCA. 
+
+### DBSCAN
+
+```{r}
+# Without PCA
+# First, we set the iris_no_labels variable into a matrix
+# DBSCAN is also different to K-means in that it does not need toreceive the number of clusters, as it will estimate that number itself.
+iris_mat <- as.matrix(iris_no_labels)
+db_res <- dbscan(iris_mat, eps = 0.5, MinPts = 4)
+table(db_res$cluster)
+pairs(iris_mat, col = db_res$cluster + 1L)
+```
+
+```{r}
+# With PCA
+db_pca_res <- dbscan(as.matrix(PCA$x), eps = 0.5, MinPts = 4)
+table(db_pca_res$cluster)
+pairs(PCA$x, col = db_pca_res$cluster + 1L)
+```
+If we compare the results, we can see that not only the distribution of the observations in the clusters are vastly different, but the number of clusters is different as well. 
+As previously mentioned, in DBSCAN, the number of clusters is decided by the technique itself. 
+In the case of using DBSCAN without applying PCA first, the number of clusters is 4, and the distribution is as follows: 13, 49, 84, 4. Very different compared to the original dataset: 50, 50, 50.
+In the case of using DBSCAN after applying PCA, the number of clusters is 3, and the distribution is as follows: 33, 45, 72.
+This distribution is closer to the original values, but not better than the results for using k-means with PCA. 
+
+### Gaussian Mixture Model
+
+```{r}
+# Without PCA
+# First, we set the iris_no_labels variable into a matrix
+# We can use the k variable previously obtained to select the number of gaussian components
+# Then we can create a GMM object, which will help us create predictions from the original dataset, which will tell us to which cluster each element belongs to
+gmm_model <- GMM(iris_no_labels, gaussian_comps = k, dist_mode = "eucl_dist")
+gmm_res <- predict(gmm_model, iris_no_labels)
+table(gmm_res)
+pairs(iris_mat, col = gmm_res + 1L)
+```
+
+```{r}
+# With PCA
+gmm_pca_model <- GMM(PCA$x, gaussian_comps = k, dist_mode = "eucl_dist")
+gmm_pca_res <- predict(gmm_pca_model, PCA$x)
+table(gmm_pca_res)
+pairs(PCA$x, col = gmm_pca_res + 1L)
+```
+As we can see when comparing the results, the original GMM model, without applying PCA, gives us good results: 64, 50, 36. 
+The results for the GMM model after applying PCA are: 55, 50, 45. 
+These results are clearly better, but both are good, setting GMM as the best clustering technique explored so far. 
+
+### Affinity Progagation clustering
+
+
+
+# Application outputs
+
+The expected outputs for this application are: 
+
+The results of applying clustering techniques to a dataframe of the original dataset, and to the same dataframe after applying a dimensionality reduction technique (Principal Component Analysis).
+
+# Analysis of results

@@ -4,22 +4,41 @@ author: "Antonio Dehesa"
 output: pdf_document
 ---
 
-## Introduction
-
-### Purpose
+# Intent of the application
 
 The purpose of this program is to explore the Iris dataset as the first programming assignment for the Data Mining course, perform exploratory operations, display features of the dataset, and create plots for the dataset.
 
-### Dataset
+The plots will be of the sepal length, sepal width, and petal length, which are characteristics in the observations of the dataset. 
 
-The dataset to be used is the Iris dataset, for which more information can be found here: https://www.ritchieng.com/machine-learning-iris-dataset/
+# Dataset to be used, including source
 
+The dataset to be used is the Iris dataset, for which more information can be found here: https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/iris.html
 
 ### Use case
 
-This program is an example on the first steps to be performed on a new dataset. 
+The use case of this application is to demonstrate basic operations with datasets, as the first steps to take when exploring a dataset for the first time and show the contents of the iris dataset. 
+It will be used as an example on how to explore a dataset, create basic plots, and how to interpret these results. 
+There are no primary actors in this case, as the purpose of this application is only to be used as an example. 
+
+# Variables
+
+Sepal.Length: The length of the sepal, which is the outer part of the flower that encloses a developing bud. 
+Sepal.Width: The width of the sepal.
+Petal.Length: The length of the petal of the flower, which are leaves that surround the reproductive parts of a flower. 
+Petal.Width: The width of the petal of the flower. 
+
+# Labels
+
+Species: Describes the species of the flower associated to the previous measurements. 
+
+# Data import
+
+In this application, there is no input needed from the user.
 
 ## Proposed Libraries
+
+datasets: Used to import the Iris dataset
+ggplot2: Used to create plots from the dataset
 
 ```{r setup, include=TRUE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -28,9 +47,10 @@ library(datasets)
 library(ggplot2)
 ```
 
-The required libraries for this program are: 
+# Library source
 
-* datasets: This librarty includes the datasaet that we require, Iris. In this case, it is a mandatory library. 
+datasets: source -> https://cran.r-project.org/package=dataset
+ggplot2: source -> https://github.com/tidyverse/ggplot2
 
 ## Dataset Analysis
 
@@ -53,7 +73,19 @@ sapply(iris[,1:4], FUN=max)
 
 With this, we can see the approximate range for the dataset, as we can see the minimum value for each column, the maximum, and the average, except for the Species column, as this is not a numeric column. 
 
-## Plots
+# Visualization of outputs
+
+First, we can look at the distribution for each of the variables that are going to be plotted
+
+```{r}
+ggplot(data=iris, mapping = aes(x = Sepal.Length)) + geom_histogram(color="red")
+ggplot(data=iris, mapping = aes(x = Sepal.Width)) + geom_histogram(color="blue")
+ggplot(data=iris, mapping = aes(x = Petal.Length)) + geom_histogram(color="green")
+```
+We can see that the Sepal Width is normally distributed, while sepal length and petal length are not. 
+Sepal length seems to be completely randomly distributed, while petal length is split in two groups, with a large gap between them. 
+
+Now we can plot Sepal length vs Sepal width:
 
 ```{r}
 ggplot(data=iris, mapping = aes(y = Sepal.Length, x = Sepal.Width)) + 
@@ -70,9 +102,12 @@ ggplot(data=iris, mapping = aes(y = Sepal.Length, x = Sepal.Width, color = Petal
   geom_point() + 
   geom_smooth(method=lm)
 ```
+
+
+
+# Analysis of results
+
 We can see a relationship, in which most of the points on the bottom-right part of the plot tend to be darker, which with the color gradient code, we know it means that most of these points have a petal length within 1 and 3, while most of the points on the upper-left part of the plot tend to be lighter, which means they are between 4 and 6. 
 
 In other words, the higher the sepal width, the lower the sepal length, the petal length would decrease.
 The lower the sepal width, the higher the sepal length, the petal length would increase. 
-
-## Conclusions
