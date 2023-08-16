@@ -438,3 +438,25 @@ Assesses sensitivity of the clusters
 
 Assesses suitability of applying clustering techniques
 
+
+# Week 6
+
+## Linear methods of regression
+
+* assume inputs are linear
+* the regression function E(Y|X) provide an interpretable description of how inputs affect outputs
+* often outperform more complicated models
+* ideal for low signal to noise and sparse data
+
+* RSS = Residual sum of squares, or sum of squared estimate of errors (SSE), is a measure of discrepancy between the data and an estimation model: = sum from i = 1 to n of (y_i - f(x_i))^2
+
+### Hypothesis testing
+
+Z_j = B_j / sigma*sqrt(v_j)
+
+where B = is a parameter that can be estimated with the least squares method
+B is the coefficient of the variables used in the estimator for the regression
+if the null hypothesis is true, B_j = 0, as B_j has a minimum effect on the regression
+a large Z_j infers a rejection of the null hypothesis
+a known value of sigma then Z_j will have a normal distribution
+

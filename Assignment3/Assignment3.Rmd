@@ -16,7 +16,7 @@ The dataset to be used is the Iris dataset, for which more information can be fo
 
 ## Elbow Method
 
-Clustering is a technique used in Data Mining in order to split the observations in a dataset into multiple groups. 
+Clustering is a technique used in Data Mining to split the observations in a dataset into multiple groups. 
 One of the most used methods for this is K-means, which consists in splitting n observations into k clusters, according to their mean. 
 The elbow method is one of the most used methods to determine K. It is a graphical method, in which the percentage of explained variation is plotted as a function of the number of clusters. When an "elbow" is formed in the plot, that is the number of clusters that should be used. 
 
@@ -26,9 +26,41 @@ Dimensionality reduction method to reduce the dimensionality (variables) of larg
 It is used to reduce the complexity of algorithms, while sacrificing as little accuracy as possible. 
 It can also help to reduce the noise in the data. 
 
+## K-means
+
+The main objective of the k-means clustering technique is to split n observations from a dataset into k clusters, using the nearest mean (cluster center) as the criteria. The mean used as the criteria depends on the observations and their features. The k comes from the previously described term, the Elbow Method. 
+The mean used as the criteria gets updated with each observation that gets added to the cluster, making the mean a more “accurate” mean. 
+
+##DBSCAN
+
+Stands for Density-Based Spatial Clustering of Applications with Noise. It is a Density-based clustering algorithm. 
+This algorithm has two differences with the previous algorithm: 
+It does not need a previously calculated K for the number of clusters, as they will be automatically chosen.
+It does not take into consideration the features themselves, but how close some observations are to others. 
+It requires two arguments: minimum number of points, and epsilon, which is the “radius” of the “circle” where the observations are densely packed. 
+This algorithm creates a circle of radius epsilon around each observation and counts how many observations are around it. If there are at least as much as the minimum number of points, then this observation is a core observation. If there are fewer, then it is just a border observation. 
+If there are no other observations close to it, then it is considered noise. 
+
+## Gaussian Mixture Model
+
+This algorithm takes the number of clusters, in this case, K. 
+It assumes that every observation is generated from a mixture of a finite number of Gaussian distributions with unknown parameters. 
+Each of these distributions is a cluster. So, this algorithm gathers every observation that belongs to the same Gaussian distribution. 
+
+## Agglomerative Hierarchical Clustering
+
+Most common type of hierarchical clustering. Also known as AGNES (Agglomerative Nesting). 
+It works by assigning each observation to a single cluster made of a single element. 
+Then the clusters get merged into the closest cluster repeatedly, until every observation is inside one single cluster. 
+By performing this action, the result is a tree-based representation of the dataset, which is known as a dendrogram. 
+It is considered a bottom-up algorithm. It is the opposite of a divisive algorithm, which starts with a single cluster for every observation, then splits them repeatedly until every observation is in their own cluster, where the cluster is made of a single element. 
+As the previous algorithm, it uses the distance between the observations to create the distributions or the clusters. The distance can be the Euclidean distance. 
+
+
 # Use case
 
-This application can be used to demonstrate the usefulness of both clustering techniques and dimensionality reduction technique with a well known dataset, which would allow for easy reproduction. 
+This application can be used to demonstrate the usefulness of both clustering techniques and dimensionality reduction technique with a well-known dataset, which would allow for easy reproduction. 
+This application is used to show the differences in clustering techniques, their advantages, disadvantages, requirements, implementation, and the difference that using PCA can have in the analysis of a dataset. 
 
 # Variables
 
@@ -47,19 +79,45 @@ In this application, there is no input needed from the user.
 
 ## Proposed Libraries
 
-datasets: Used to import the Iris dataset
-ggplot2: Used to create plots from the dataset
+datasets: Used to import the Iris dataset.
+ggplot2: Used to create plots from the dataset.
 factoextra: Used to create the elbow plot, as well as visualize multivariate data analyses. In this case, both the elbow plot and the PCA (Principal Component Analysis) will be used. 
+fpc: Used to perform the DBSCAN clustering technique.
+ggfortify: Used to perform plots on PCA.
+ClusterR: Used to perform the Gaussian Mixture Model technique. 
+Tidyverse: Used to facilitate data manipulation used in the clustering techniques and plots.
+cluster: Used for some clustering algorithms.
+dendextend: Used to create dendrograms, which will allow us to plot them. 
+ape: Used to facilitate the plotting of dendrograms, as well as their manipulation.
+FactoMineR: Used to perform the PCA dimensionality reduction technique. 
 
-```{r setup, include=TRUE}
+datasets: source -> https://cran.r-project.org/package=dataset
+ggplot2: source -> https://github.com/tidyverse/ggplot2
+factoextra: source -> https://cran.r-project.org/web/packages/factoextra/index.html
+ggfortify: source -> https://cran.r-project.org/web/packages/ggfortify/index.html
+fpc: source -> https://cran.r-project.org/web/packages/fpc/index.html
+ClusterR: source -> https://cran.r-project.org/web/packages/ClusterR/index.html
+tidyverse: source -> https://cran.r-project.org/web/packages/tidyverse/index.html
+cluster: source -> https://cran.r-project.org/web/packages/cluster/index.html
+dendextend: source -> https://cran.r-project.org/web/packages/dendextend/index.html
+ape: source -> https://cran.r-project.org/web/packages/ape/index.html
+FactoMineR: source -> https://cran.r-project.org/web/packages/FactoMineR/index.html
+
+
+```{r setup, include=TRUE, warning=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 
 library(datasets)
 library(ggplot2)
-library(factoextra)
 library(ggfortify)
 library(fpc) # For DBSCAN
 library(ClusterR) # For Gaussian Mixture Models, for distribution based clustering
+library(tidyverse)  # data manipulation
+library(cluster)    # clustering algorithms
+library(factoextra) # clustering visualization
+library(dendextend) # for comparing two dendrograms
+library(ape) # for visualizing dendograms
+library(FactoMineR) # For PCA
 ```
 
 # Library source
@@ -84,11 +142,11 @@ str(iris)
 
 ```{r}
 # To perform the elbow plot, we can use the fviz_nbclust method from the factoextra library
-# as kmeans cannot work with non-numeric values, we remove the labels in a temporary dataset
-iris_no_labels <- iris[,-5]
 # Now we randomly shuffle the dataset, as to avoid the observations to be clustered directly from the dataset
 set.seed(987654) 
-iris_no_labels <- iris_no_labels[sample(nrow(iris_no_labels)),]
+iris <- iris[sample(nrow(iris)),]
+# as kmeans cannot work with non-numeric values, we remove the labels in a temporary dataset
+iris_no_labels <- iris[,-5]
 fviz_nbclust(iris_no_labels, kmeans, method = "wss")
 ```
 As we can see in our plot, the optimal number of clusters is 3. 
@@ -122,20 +180,7 @@ km.original.ans
 km.pca.ans <- kmeans(PCA$x, centers = k)
 km.pca.ans
 ```
-We can now plot both results to compare them.
 
-```{r}
-# Plot for the dataset without applying PCA
-km.orig.plot <- factor(km.original.ans$cluster)
-ggplot(iris_no_labels, aes(Sepal.Length, Sepal.Width, color=km.orig.plot)) + geom_point() + xlab("Sepal.Length") + ylab("Sepal.Width")
-```
-
-
-```{r}
-# Plot for the dataset after applying PCA
-km.pca.plot <- factor(km.pca.ans$cluster)
-ggplot(PCA, aes(PC1, PC2, color=km.pca.plot)) + geom_point() + xlab("PC1") + ylab("PC2")
-```
 Results for K-means:
 
 We can see that applying K-means clustering for the dataset without applying PCA the observations are split into 3 clusters with the following counts: 21, 33, 96.
@@ -149,6 +194,32 @@ table(iris$Species)
 Exactly 50, 50, 50. 
 Therefore, the closes approximation is K-means clustering after applying PCA. 
 
+
+Now, we need to compare accuracy. Unfortunately, the results only show the clusters as numbers, so we cannot be truly sure which number corresponds to which cluster, so we will just take them as they appear in order in the original dataset after shuffling: 1 = virginica, 2 = setosa, 3 = versicolor
+```{r}
+# No PCA
+# First we prepare the data
+comparing <- km.original.ans
+comparing$cluster[comparing$cluster == 1] <- "virginica"
+comparing$cluster[comparing$cluster == 2] <- "setosa"
+comparing$cluster[comparing$cluster == 3] <- "versicolor"
+# Then we compare
+comp_res <- comparing$cluster == iris$Species
+table(comp_res)
+```
+```{r}
+# With PCA
+# First we prepare the data
+comparing <- km.pca.ans
+comparing$cluster[comparing$cluster == 1] <- "virginica"
+comparing$cluster[comparing$cluster == 2] <- "setosa"
+comparing$cluster[comparing$cluster == 3] <- "versicolor"
+# Then we compare
+comp_res <- comparing$cluster == iris$Species
+table(comp_res)
+```
+As we can see, the accuracy improved a lot. 
+
 ### DBSCAN
 
 ```{r}
@@ -158,14 +229,12 @@ Therefore, the closes approximation is K-means clustering after applying PCA.
 iris_mat <- as.matrix(iris_no_labels)
 db_res <- dbscan(iris_mat, eps = 0.5, MinPts = 4)
 table(db_res$cluster)
-pairs(iris_mat, col = db_res$cluster + 1L)
 ```
 
 ```{r}
 # With PCA
 db_pca_res <- dbscan(as.matrix(PCA$x), eps = 0.5, MinPts = 4)
 table(db_pca_res$cluster)
-pairs(PCA$x, col = db_pca_res$cluster + 1L)
 ```
 If we compare the results, we can see that not only the distribution of the observations in the clusters are vastly different, but the number of clusters is different as well. 
 As previously mentioned, in DBSCAN, the number of clusters is decided by the technique itself. 
@@ -173,6 +242,32 @@ In the case of using DBSCAN without applying PCA first, the number of clusters i
 In the case of using DBSCAN after applying PCA, the number of clusters is 3, and the distribution is as follows: 33, 45, 72.
 This distribution is closer to the original values, but not better than the results for using k-means with PCA. 
 
+Now we compare accuracy:
+
+```{r}
+# No PCA
+# First we prepare the data
+comparing <- db_res
+comparing$cluster[comparing$cluster == 0] <- "virginica"
+comparing$cluster[comparing$cluster == 1] <- "setosa"
+comparing$cluster[comparing$cluster == 2] <- "versicolor"
+# Then we compare
+comp_res <- comparing$cluster == iris$Species
+table(comp_res)
+```
+
+```{r}
+# With PCA
+# First we prepare the data
+comparing <- db_pca_res
+comparing$cluster[comparing$cluster == 0] <- "virginica"
+comparing$cluster[comparing$cluster == 1] <- "setosa"
+comparing$cluster[comparing$cluster == 2] <- "versicolor"
+# Then we compare
+comp_res <- comparing$cluster == iris$Species
+table(comp_res)
+```
+We cannot see any improvement in the accuracy. In fact, there is no change in the accuracy. 
 ### Gaussian Mixture Model
 
 ```{r}
@@ -183,7 +278,6 @@ This distribution is closer to the original values, but not better than the resu
 gmm_model <- GMM(iris_no_labels, gaussian_comps = k, dist_mode = "eucl_dist")
 gmm_res <- predict(gmm_model, iris_no_labels)
 table(gmm_res)
-pairs(iris_mat, col = gmm_res + 1L)
 ```
 
 ```{r}
@@ -191,15 +285,207 @@ pairs(iris_mat, col = gmm_res + 1L)
 gmm_pca_model <- GMM(PCA$x, gaussian_comps = k, dist_mode = "eucl_dist")
 gmm_pca_res <- predict(gmm_pca_model, PCA$x)
 table(gmm_pca_res)
-pairs(PCA$x, col = gmm_pca_res + 1L)
 ```
 As we can see when comparing the results, the original GMM model, without applying PCA, gives us good results: 64, 50, 36. 
 The results for the GMM model after applying PCA are: 55, 50, 45. 
 These results are clearly better, but both are good, setting GMM as the best clustering technique explored so far. 
 
-### Affinity Progagation clustering
+Now we compare accuracy:
+
+```{r}
+# No PCA
+# First we prepare the data
+
+comparing$cluster <- gmm_res
+comparing$cluster[comparing$cluster == 1] <- "virginica"
+comparing$cluster[comparing$cluster == 2] <- "setosa"
+comparing$cluster[comparing$cluster == 3] <- "versicolor"
+# Then we compare
+comp_res <- comparing$cluster == iris$Species
+table(comp_res)
+```
+
+```{r}
+# With PCA
+comparing$cluster <- gmm_pca_res
+comparing$cluster[comparing$cluster == 1] <- "virginica"
+comparing$cluster[comparing$cluster == 2] <- "setosa"
+comparing$cluster[comparing$cluster == 3] <- "versicolor"
+# Then we compare
+comp_res <- comparing$cluster == iris$Species
+table(comp_res)
+```
+As we can see, the accuracy improved, but not by much. Just barely noticeable.
+### Agglomerative Hierarchical Clustering
+
+```{r}
+# Without PCA
+# This clustering method does not require a specified number of clusters, but it does require the data to be normalized
+iris_AHC <- as.data.frame(scale(iris_no_labels))
+ahc_dd <- dist(iris_AHC, method = "euclidean")
+ahc_res <- hclust(ahc_dd, method = "ward.D2")
+clus3 = cutree(ahc_res, k) # We split it in 3 clusters, for plotting purposes only
+table(clus3)
+```
+
+```{r}
+# with PCA
+new_pca <- PCA(iris_no_labels, ncp = 4, graph = FALSE)
+ahc_pca_res <- HCPC(new_pca, graph = FALSE)
+table(ahc_pca_res$data.clust$clust)
+```
+We can see that after applying PCA, the results improve by a lot. As in previous examples, without PCA the results are: 
+71, 49, 30
+After applying PCA, the results are 50, 53, 47
+
+Now we compare accuracy:
+
+```{r}
+# No PCA
+# First we prepare the data
+
+comparing$cluster <- clus3
+AHC_orig <- comparing
+comparing$cluster[comparing$cluster == 1] <- "virginica"
+comparing$cluster[comparing$cluster == 2] <- "setosa"
+comparing$cluster[comparing$cluster == 3] <- "versicolor"
+# Then we compare
+AHC_orig <- comparing
+comp_res <- comparing$cluster == iris$Species
+table(comp_res)
+```
+
+```{r}
+# With PCA
+# First we prepare the data
+comparing <- ahc_pca_res$data.clust
+AHC_PCA <- comparing
+comparing$clust <- as.numeric(comparing$clust)
+comparing$clust[comparing$clust == 1] <- "setosa"
+comparing$clust[comparing$clust == 2] <- "versicolor"
+comparing$clust[comparing$clust == 3] <- "virginica"
+# Then we compare
+comp_res <- comparing$clust == iris$Species
+table(comp_res)
+```
+The improvement was marginally better, but not very relevant, and probably, not statistically significant. 
+
+# Plots
+
+## K-means
+
+```{r}
+# Plot for the dataset without applying PCA
+km.orig.plot <- factor(km.original.ans$cluster)
+ggplot(iris_no_labels, aes(Sepal.Length, Sepal.Width, color=km.orig.plot)) + geom_point() + xlab("Sepal.Length") + ylab("Sepal.Width")
+```
 
 
+```{r}
+# Plot for the dataset after applying PCA
+km.pca.plot <- factor(km.pca.ans$cluster)
+ggplot(PCA, aes(PC1, PC2, color=km.pca.plot)) + geom_point() + xlab("PC1") + ylab("PC2")
+```
+
+As we can see, the plot for the data with PCA does not help us to directly compare the results with the original dataset. 
+So we could instead simply plot the iris dataset, using the results with PCA for the colors, another plot using the clusters without PCA for the colors, and the original dataset with the original clusters for comparison: 
+
+```{r}
+ggplot(iris_no_labels, aes(Sepal.Length, Sepal.Width, color=km.pca.plot)) + geom_point() + xlab("Sepal.Length") + ylab("Sepal.Width")
+ggplot(iris_no_labels, aes(Sepal.Length, Sepal.Width, color=km.orig.plot)) + geom_point() + xlab("Sepal.Length") + ylab("Sepal.Width")
+ggplot(iris_no_labels, aes(Sepal.Length, Sepal.Width, color=iris$Species)) + geom_point() + xlab("Sepal.Length") + ylab("Sepal.Width")
+```
+As we can see, the plots for the original dataset and the one after applying PCA are very similar, with the only difference being the colors. 
+However, the plot for the clusters without applying PCA are quite different. 
+Therefore, we can confirm that using PCA improved the performance for this algorithm.
+
+## DBSCAN
+
+```{r}
+# Plot before PCA
+pairs(iris_mat, col = db_res$cluster + 1L)
+```
+
+```{r}
+# Plot after PCA
+pairs(PCA$x, col = db_pca_res$cluster + 1L)
+```
+
+We can perform a similar analysis as in the previous algorithm: 
+
+```{r}
+# Plot before PCA
+pairs(iris_mat, col = db_res$cluster + 1L)
+# Plot after PCA
+pairs(iris_mat, col = (db_pca_res$cluster)+1 + 1L)
+# Original dataset
+pairs(iris_mat, col=as.integer(iris$Species) + 1L)
+```
+
+As we can see, some observations improved without PCA, and some improved with PCA. 
+The one without using PCA seems to be more accurate, but it left several observations without a valid cluster, as we saw it chose 4 clusters, when the maximum we can really have is 3. 
+After applying PCA, we can see that the number of clusters was 3, which is consistent with our original dataset. 
+However, we can also see that, evern though every observation received a classification, several of them received an incorrect classification. 
+That is probably why the accuracy did not seem to improve. 
+
+## Gaussian Mixture Model
+
+```{r}
+# Plot before PCA
+pairs(iris_mat, col = gmm_res + 1L)
+```
+
+```{r}
+# Plot after PCA
+pairs(iris_mat, col = gmm_pca_res + 1L)
+```
+
+We can use a similar approach as in the previous method: 
+
+```{r}
+# Plot before PCA
+pairs(iris_mat, col = gmm_res + 1L)
+# Plot after PCA
+pairs(iris_mat, col = gmm_pca_res + 1L)
+# Original dataset
+pairs(iris_mat, col = as.integer(iris$Species) + 1L)
+```
+As previously seen, the accuracy between using PCA and not using it is not very different. 
+As a result, the plots for pre-PCA and post-PCA are basically the same. 
+We can see, despite the difference in colors for the original dataset, some observations are in different colors in the pre and post PCA plots. 
+This lets us know that neither of them is highly accurate. 
+## Agglomerative Hierarchical Clustering
+
+```{r}
+# Plot before PCA
+#For visualization purposes, we can manually choose the number of clusters
+colors = c("red", "blue", "green") # We choose 3 colors, as we know there are 3 species
+plot(as.phylo(ahc_res), type = "fan", tip.color = colors[clus3],
+     label.offset = 1, cex = 0.7)
+```
+
+```{r}
+# After PCA
+fviz_dend(ahc_pca_res, 
+          cex = 0.7,                     # Label size
+          palette = "jco",               # Color palette
+          rect = TRUE, rect_fill = TRUE, # Add rectangle around groups
+          rect_border = "jco",           # Rectangle color
+          labels_track_height = 0.8      # Augment the room for labels
+          )
+```
+
+Now we compare the results:
+
+```{r}
+# Before PCA
+ggplot(iris_no_labels, aes(Sepal.Length, Sepal.Width, color=AHC_orig$clust)) + geom_point() + xlab("Sepal.Length") + ylab("Sepal.Width")
+# After PCA
+ggplot(iris_no_labels, aes(Sepal.Length, Sepal.Width, color=AHC_PCA$clust)) + geom_point() + xlab("Sepal.Length") + ylab("Sepal.Width")
+# Original
+ggplot(iris_no_labels, aes(Sepal.Length, Sepal.Width, color=iris$Species)) + geom_point() + xlab("Sepal.Length") + ylab("Sepal.Width")
+```
+As we can see, the plot from before applying PCA and after applying PCA are very similar, and they are both similar to the original plot, but with some differences. 
 
 # Application outputs
 
@@ -208,3 +494,9 @@ The expected outputs for this application are:
 The results of applying clustering techniques to a dataframe of the original dataset, and to the same dataframe after applying a dimensionality reduction technique (Principal Component Analysis).
 
 # Analysis of results
+
+As we can see, for some of the clustering techniques, the use of PCA on the Iris dataset improved the accuracy of the classification, but in some, the difference was negligible. 
+The most noticeable difference was in the K-means clustering technique, as the accuracy improved from only 79 observations being correct, to 125 being correct. 
+The clustering technique with the least difference before and after applying PCA is DBSCAN, as both have the same number of correct classifications. However, they do have different mistaken classifications. 
+
+Therefore, we can conclude that PCA, although helpful, is not perfect, and does not mean that by using it, the clustering techniques, or any other analysis we perform will automatically improve. 
